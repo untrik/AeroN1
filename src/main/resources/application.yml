@@ -1,0 +1,20 @@
+server:
+  port: 8086
+
+#spring:
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/opensky
+#    username: untrick
+#    password: kirpa2005
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+opensky:
+  auth-url: https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token
+  api-url:  https://opensky-network.org/api
+  client-id: untrick-api-client
+  client-secret: rwwF3innyCPhkqWjNtVE7fhT52NFX7hE
+
+vrs:
+  feed-path: /Feed/AllAircraft.json
+  fetch-interval-ms: 15000   # как часто опрашивать OpenSky
