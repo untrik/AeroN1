@@ -2,6 +2,8 @@ package org.example.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.data_base.AirDao;
+import org.example.data_base.ConditionDao;
 import org.example.models.VrsAir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,7 @@ public class OpenSkyFetchService {
         cache.clear();
         idGen.set(1);
 
+        long time = root.get("time").asLong();
         for (JsonNode s : root.path("states")) {
             String country = s.get(2).asText("");
             if (!"Russian Federation".equals(country)) {
@@ -76,7 +79,6 @@ public class OpenSkyFetchService {
                 log.warn("Skipping invalid coords: lon={}, lat={}", lon, lat);
                 continue;
             }
-
             VrsAir ac = new VrsAir();
             ac.setId(idGen.getAndIncrement());
             ac.setIcao(s.get(0).asText(""));
@@ -88,6 +90,31 @@ public class OpenSkyFetchService {
             ac.setTrack(s.get(10).asDouble(0.0));
 
             cache.put(ac.getId(), ac);
+
+            boolean isAirInDataBase = false;
+            if (!AirDao.isThereAir(ac.getIcao())) {
+                System.out.printf("Новый самолет! icao24 = %s, country = %s\n", ac.getIcao(), country);
+                if (AirDao.addAir(ac.getIcao(), country)) {
+                    System.out.printf("Добавлен самолет icao24 = %s, country = %s\n", ac.getIcao(), country);
+                    isAirInDataBase = true;
+                } else {
+                    System.out.printf("Не удалось добавить самолет icao24 = %s, country = %s\n", ac.getIcao(), country);
+                }
+            } else {
+                isAirInDataBase = true;
+            }
+            if (isAirInDataBase) {
+                int timePosition = s.get(3).asInt();
+                int lastContact = s.get(4).asInt();
+                boolean onGround = s.get(8).asBoolean();
+                double verticalRate = s.get(11).asDouble();
+                double geoAltitude = s.get(13).asDouble();
+                String squawk = s.get(14).asText();
+                boolean spi = s.get(15).asBoolean();
+                int positionSource = s.get(16).asInt();
+                ConditionDao.addCondition(ac, time, timePosition, lastContact, onGround, verticalRate, geoAltitude,
+                        squawk, spi, positionSource);
+            }
         }
 
         log.info("Refresh complete, cache size={}", cache.size());
