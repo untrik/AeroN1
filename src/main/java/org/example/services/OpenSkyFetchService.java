@@ -26,8 +26,8 @@ public class OpenSkyFetchService {
     private final AtomicInteger idGen = new AtomicInteger(1);
 
     public OpenSkyFetchService(WebClient apiClient,
-                               TokenService tokenService) {
-        this.apiClient    = apiClient;
+            TokenService tokenService) {
+        this.apiClient = apiClient;
         this.tokenService = tokenService;
     }
 
@@ -48,7 +48,7 @@ public class OpenSkyFetchService {
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
-            log.info("Raw JSON length = {} bytes", json != null ? json.length() : 0);
+            // log.info("Raw JSON length = {} bytes", json != null ? json.length() : 0);
         } catch (Exception e) {
             log.error("ERROR fetching raw JSON from OpenSky", e);
             return;
@@ -73,7 +73,7 @@ public class OpenSkyFetchService {
             double lon = s.get(5).asDouble(Double.NaN);
             double lat = s.get(6).asDouble(Double.NaN);
             if (Double.isNaN(lon) || Double.isNaN(lat)) {
-                log.warn("Skipping invalid coords: lon={}, lat={}", lon, lat);
+                // log.warn("Skipping invalid coords: lon={}, lat={}", lon, lat);
                 continue;
             }
 
@@ -90,7 +90,7 @@ public class OpenSkyFetchService {
             cache.put(ac.getId(), ac);
         }
 
-        log.info("Refresh complete, cache size={}", cache.size());
+        // log.info("Refresh complete, cache size={}", cache.size());
     }
 
     /**
