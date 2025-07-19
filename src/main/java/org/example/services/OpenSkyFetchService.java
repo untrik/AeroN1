@@ -88,6 +88,7 @@ public class OpenSkyFetchService {
             ac.setAltitude(s.get(7).asDouble(0.0));
             ac.setSpeed(s.get(9).asDouble(0.0));
             ac.setTrack(s.get(10).asDouble(0.0));
+            ConditionDao.updateLastCoordinates(ac);
 
             cache.put(ac.getId(), ac);
 
