@@ -9,6 +9,12 @@ public class VrsAir {
     private double longitude;
     private double altitude;
     private double speed;
+    private double track;
+    private boolean onGround;
+    private String squawk;
+    private String originCountry;
+    private double verticalRate;
+    private long   lastSeen;
 
     public int getId() {
         return id;
@@ -17,7 +23,6 @@ public class VrsAir {
     public void setId(int id) {
         this.id = id;
     }
-
 
     public String getIcao() {
         return icao;
@@ -83,5 +88,43 @@ public class VrsAir {
         this.track = track;
     }
 
-    private double track;
+    public String getOriginCountry() {
+        return originCountry;
+    }
+
+    public void setOriginCountry(String originCountry) {
+        this.originCountry = originCountry;
+    }
+
+    public boolean isOnGround() {
+        return onGround;
+    }
+
+    public String getSquawk() {
+        return squawk;
+    }
+
+    public double getVerticalRate() {
+        return verticalRate;
+    }
+
+    public void setOnGround(boolean onGround) {
+        this.onGround = onGround;
+    }
+
+    public void setSquawk(String squawk) {
+        this.squawk = squawk;
+    }
+
+    public void setVerticalRate(double verticalRate) {
+        this.verticalRate = verticalRate;
+    }
+
+    public void setLastSeen(long lastSeen) {
+        this.lastSeen = lastSeen;
+    }
+
+    public long getLastSeen() {
+        return lastSeen;
+    }
 }
