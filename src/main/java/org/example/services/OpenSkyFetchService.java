@@ -88,6 +88,12 @@ public class OpenSkyFetchService {
             ac.setAltitude(s.get(7).asDouble(0.0));
             ac.setSpeed(s.get(9).asDouble(0.0));
             ac.setTrack(s.get(10).asDouble(0.0));
+            ac.setOriginCountry(country);
+            ac.setLastSeen(s.get(4).asInt());
+            ac.setOnGround(s.get(8).asBoolean());
+            ac.setVerticalRate(s.get(11).asDouble());
+            ac.setSquawk(s.get(14).asText());
+
             ConditionDao.updateLastCoordinates(ac);
 
             cache.put(ac.getId(), ac);
