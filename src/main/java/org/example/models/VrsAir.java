@@ -20,6 +20,7 @@ public class VrsAir {
     private List<Double> longitudes; // значения долготы за последние 24 часа
     private List<Double> latitudes; // значения широты за последние 24 часа
 
+
     public int getId() {
         return id;
     }
@@ -131,6 +132,7 @@ public class VrsAir {
     public long getLastSeen() {
         return lastSeen;
     }
+
 
     public List<Double> getLongitudes() {
         return longitudes;
