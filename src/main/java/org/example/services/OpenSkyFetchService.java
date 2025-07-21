@@ -94,6 +94,8 @@ public class OpenSkyFetchService {
             ac.setVerticalRate(s.get(11).asDouble());
             ac.setSquawk(s.get(14).asText());
 
+            ConditionDao.updateLastCoordinates(ac);
+
             cache.put(ac.getId(), ac);
 
             boolean isAirInDataBase = false;

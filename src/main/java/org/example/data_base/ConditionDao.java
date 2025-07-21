@@ -2,10 +2,9 @@ package org.example.data_base;
 
 import org.example.models.VrsAir;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConditionDao {
     static private final String url = "jdbc:postgresql://localhost:5432/Radar";
@@ -64,4 +63,32 @@ public class ConditionDao {
     }
 
 
+    public static void updateLastCoordinates(VrsAir air) {
+        String sql = """
+                SELECT DISTINCT longitude, latitude
+                FROM conditions
+                WHERE NOW() - to_timestamp(time) < INTERVAL '24 hours'
+                AND aircrafts_icao24 = ?;
+                """;
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             pstmt.setString(1, air.getIcao());
+             ResultSet rs = pstmt.executeQuery();
+             List<Double> longitudes = new ArrayList<>();
+             List<Double> latitudes = new ArrayList<>();
+             while (rs.next()) {
+                 longitudes.add(rs.getDouble("longitude"));
+                 latitudes.add(rs.getDouble("latitude"));
+             }
+             air.setLatitudes(latitudes);
+             air.setLongitudes(longitudes);
+             System.out.printf("Для самолета %s получены его координаты за последние сутки\n", air.getIcao());
+             System.out.println(air.getLatitudes());
+             System.out.println(air.getLongitudes());
+        } catch (SQLException e) {
+            // e.printStackTrace();
+            System.out.printf("Не удалось получить координат для %s за последние 24 часа\n", air.getIcao());
+            System.out.println(e.getMessage());
+        }
+    }
 }

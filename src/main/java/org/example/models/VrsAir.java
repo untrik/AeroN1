@@ -1,5 +1,7 @@
 package org.example.models;
 
+import java.util.List;
+
 public class VrsAir {
     private int    id;
     private String icao;
@@ -15,6 +17,9 @@ public class VrsAir {
     private String originCountry;
     private double verticalRate;
     private long   lastSeen;
+    private List<Double> longitudes; // значения долготы за последние 24 часа
+    private List<Double> latitudes; // значения широты за последние 24 часа
+
 
     public int getId() {
         return id;
@@ -126,5 +131,22 @@ public class VrsAir {
 
     public long getLastSeen() {
         return lastSeen;
+    }
+
+
+    public List<Double> getLongitudes() {
+        return longitudes;
+    }
+
+    public List<Double> getLatitudes() {
+        return latitudes;
+    }
+
+    public void setLongitudes(List<Double> longitudes) {
+        this.longitudes = longitudes;
+    }
+
+    public void setLatitudes(List<Double> latitudes) {
+        this.latitudes = latitudes;
     }
 }
