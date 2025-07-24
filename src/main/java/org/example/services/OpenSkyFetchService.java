@@ -11,7 +11,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -26,6 +28,9 @@ public class OpenSkyFetchService {
     // Кэш текущих самолётов
     private final ConcurrentHashMap<Integer, VrsAir> cache = new ConcurrentHashMap<>();
     private final AtomicInteger idGen = new AtomicInteger(1);
+
+    // все состояния, поступившие за раз через API
+    private List<ConditionDao> conditions = new ArrayList<>();
 
     public OpenSkyFetchService(WebClient apiClient,
                                TokenService tokenService) {
@@ -112,18 +117,20 @@ public class OpenSkyFetchService {
             }
             if (isAirInDataBase) {
                 int timePosition = s.get(3).asInt();
-                int lastContact = s.get(4).asInt();
-                boolean onGround = s.get(8).asBoolean();
-                double verticalRate = s.get(11).asDouble();
                 double geoAltitude = s.get(13).asDouble();
-                String squawk = s.get(14).asText();
                 boolean spi = s.get(15).asBoolean();
                 int positionSource = s.get(16).asInt();
-                ConditionDao.addCondition(ac, time, timePosition, lastContact, onGround, verticalRate, geoAltitude,
-                        squawk, spi, positionSource);
+                ConditionDao conditionDao = new ConditionDao(ac, timePosition, geoAltitude, spi, positionSource, time);
+                if (conditionDao.getIcao() != null) {
+                    conditions.add(conditionDao);
+                }
             }
         }
 
+        if (!conditions.isEmpty()) {
+            ConditionDao.addConditions(conditions);
+            conditions.clear();
+        }
         log.info("Refresh complete, cache size={}", cache.size());
     }
 

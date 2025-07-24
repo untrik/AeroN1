@@ -11,9 +11,25 @@ public class ConditionDao {
     static private final String user = "postgres";
     static private final String password = "ourproga";
 
+    private String icao;
+    private String callsign;
+    private double latitude;
+    private double longitude;
+    private double altitude;
+    private double speed;
+    private double track;
+    private boolean onGround;
+    private String squawk;
+    private String originCountry;
+    private double verticalRate;
+    private long   lastSeen;
+    int            timePosition;
+    double         geoAltitude;
+    boolean        spi;
+    int            positionSource;
+    long           time;
 
-    public static void addCondition(VrsAir air, long time, int timePosition, int lastContact, boolean onGround,
-            double verticalRate, double geoAltitude, String squawk, boolean spi, int positionSource) {
+    public static void addConditions(List<ConditionDao> conditions) {
         String sql = """
         INSERT INTO conditions(
         time,
@@ -35,30 +51,37 @@ public class ConditionDao {
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
-        try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-             pstmt.setLong(1, time);
-             pstmt.setString(2, air.getIcao());
-             pstmt.setString(3, air.getCallsign());
-             pstmt.setInt(4, timePosition);
-             pstmt.setInt(5, lastContact);
-             pstmt.setDouble(6, air.getLongitude());
-             pstmt.setDouble(7, air.getLatitude());
-             pstmt.setDouble(8, air.getAltitude());
-             pstmt.setBoolean(9, onGround);
-             pstmt.setDouble(10, air.getSpeed());
-             pstmt.setDouble(11, air.getTrack());
-             pstmt.setDouble(12, verticalRate);
-             pstmt.setDouble(13, geoAltitude);
-             pstmt.setString(14, squawk);
-             pstmt.setBoolean(15, spi);
-             pstmt.setInt(16, positionSource);
-             pstmt.executeUpdate();
-             System.out.println("Добавлено состояние самолета icao = " + air.getIcao());
+        try (Connection conn = DriverManager.getConnection(url, user, password)) {
+             conn.setAutoCommit(false);
+             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                 for (ConditionDao condition : conditions) {
+                     pstmt.setLong(1, condition.getTime());
+                     pstmt.setString(2, condition.getIcao());
+                     pstmt.setString(3, condition.getCallsign());
+                     pstmt.setInt(4, condition.getTimePosition());
+                     pstmt.setLong(5, condition.getLastSeen());
+                     pstmt.setDouble(6, condition.getLongitude());
+                     pstmt.setDouble(7, condition.getLatitude());
+                     pstmt.setDouble(8, condition.getAltitude());
+                     pstmt.setBoolean(9, condition.isOnGround());
+                     pstmt.setDouble(10, condition.getSpeed());
+                     pstmt.setDouble(11, condition.getTrack());
+                     pstmt.setDouble(12, condition.getVerticalRate());
+                     pstmt.setDouble(13, condition.getGeoAltitude());
+                     pstmt.setString(14, condition.getSquawk());
+                     pstmt.setBoolean(15, condition.isSpi());
+                     pstmt.setInt(16, condition.getPositionSource());
+                     pstmt.addBatch();
+                 }
+                 pstmt.executeBatch();
+                 conn.commit();
+                 System.out.printf("Добавлены %s состояний самолетов:\n", conditions.size());
+                 for (ConditionDao conditionDao : conditions) System.out.println(conditionDao);
+             } catch (SQLException e) {
+                 System.out.printf("Произошла ошибка %s во время добавления состояния: %s");
+             }
         } catch (SQLException e) {
-            // e.printStackTrace();
-            System.out.println("[ошибка condition]" + e.getMessage());
-           // return false;
+            System.out.println("Ошибка при подключении к БД: " + e.getMessage());
         }
     }
 
@@ -83,12 +106,104 @@ public class ConditionDao {
              air.setLatitudes(latitudes);
              air.setLongitudes(longitudes);
              System.out.printf("Для самолета %s получены его координаты за последние сутки\n", air.getIcao());
-             System.out.println(air.getLatitudes());
-             System.out.println(air.getLongitudes());
+             //System.out.println("Широта: " + air.getLatitudes());
+             //System.out.println("Долгота: " + air.getLongitudes());
         } catch (SQLException e) {
-            // e.printStackTrace();
             System.out.printf("Не удалось получить координат для %s за последние 24 часа\n", air.getIcao());
             System.out.println(e.getMessage());
         }
+    }
+
+    public ConditionDao(VrsAir air, int timePosition, double geoAltitude, boolean spi, int positionSource, long time) {
+        icao = air.getIcao();
+        callsign = air.getCallsign();
+        latitude = air.getLatitude();
+        longitude = air.getLongitude();
+        altitude = air.getAltitude();
+        speed = air.getSpeed();
+        track = air.getTrack();
+        onGround = air.isOnGround();
+        squawk = air.getSquawk();
+        originCountry = air.getOriginCountry();
+        verticalRate = air.getVerticalRate();
+        lastSeen = air.getLastSeen();
+        this.timePosition = timePosition;
+        this.geoAltitude = geoAltitude;
+        this.spi = spi;
+        this.positionSource = positionSource;
+        this.time = time;
+    }
+
+    public String getIcao() {
+        return icao;
+    }
+
+    public String getCallsign() {
+        return callsign;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public double getAltitude() {
+        return altitude;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public double getTrack() {
+        return track;
+    }
+
+    public boolean isOnGround() {
+        return onGround;
+    }
+
+    public String getSquawk() {
+        return squawk;
+    }
+
+    public String getOriginCountry() {
+        return originCountry;
+    }
+
+    public double getVerticalRate() {
+        return verticalRate;
+    }
+
+    public long getLastSeen() {
+        return lastSeen;
+    }
+
+    public int getTimePosition() {
+        return timePosition;
+    }
+
+    public double getGeoAltitude() {
+        return geoAltitude;
+    }
+
+    public boolean isSpi() {
+        return spi;
+    }
+
+    public int getPositionSource() {
+        return positionSource;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("icao = %s, callsign = %s, longitude = %s, latitude = %s, speed = %s", icao, callsign, longitude, latitude, speed);
     }
 }

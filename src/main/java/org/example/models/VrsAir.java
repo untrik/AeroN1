@@ -5,7 +5,6 @@ import java.util.List;
 public class VrsAir {
     private int    id;
     private String icao;
-    private String registration;
     private String callsign;
     private double latitude;
     private double longitude;
@@ -45,10 +44,6 @@ public class VrsAir {
         return altitude;
     }
 
-    public String getRegistration() {
-        return registration;
-    }
-
     public String getCallsign() {
         return callsign;
     }
@@ -63,10 +58,6 @@ public class VrsAir {
 
     public void setIcao(String icao) {
         this.icao = icao;
-    }
-
-    public void setRegistration(String registration) {
-        this.registration = registration;
     }
 
     public void setLatitude(double latitude) {
@@ -132,7 +123,6 @@ public class VrsAir {
     public long getLastSeen() {
         return lastSeen;
     }
-
 
     public List<Double> getLongitudes() {
         return longitudes;
